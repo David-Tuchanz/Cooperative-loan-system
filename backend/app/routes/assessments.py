@@ -2,7 +2,7 @@
 from decimal import Decimal, InvalidOperation
 
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from extensions import db
 from app.models import LoanApplication, LoanApplicationAssessment
@@ -20,7 +20,9 @@ NUMERIC_FIELDS = {
     "existing_monthly_obligation",
     "savings_balance",
     "share_value",
-    "collateral_value"
+    "collateral_value",
+    "monthly_contribution",
+    "total_contributions"
 }
 
 INTEGER_FIELDS = {
@@ -34,7 +36,9 @@ TEXT_FIELDS = {
     "employment_status",
     "occupation",
     "marital_status",
-    "collateral_type"
+    "collateral_type",
+    "contribution_frequency",
+    "contribution_status"
 }
 
 ALL_FIELDS = (
@@ -68,7 +72,11 @@ def validate_assessment(data):
                 return None, f"{field} must be a valid non-negative number."
 
         elif field in INTEGER_FIELDS:
-            if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            if (
+                not isinstance(value, int)
+                or isinstance(value, bool)
+                or value < 0
+            ):
                 return None, f"{field} must be a non-negative integer."
             cleaned[field] = value
 
@@ -77,8 +85,10 @@ def validate_assessment(data):
                 return None, f"{field} must be text."
             cleaned[field] = value.strip() or None
 
-    rate = cleaned.get("previous_repayment_rate")
-    if "previous_repayment_rate" in data and data["previous_repayment_rate"] not in (None, ""):
+    if (
+        "previous_repayment_rate" in data
+        and data["previous_repayment_rate"] not in (None, "")
+    ):
         try:
             rate = Decimal(str(data["previous_repayment_rate"]))
             if not rate.is_finite() or rate < 0 or rate > 1:
@@ -90,9 +100,27 @@ def validate_assessment(data):
     if (
         cleaned.get("previous_default_count") is not None
         and cleaned.get("previous_loan_count") is not None
-        and cleaned["previous_default_count"] > cleaned["previous_loan_count"]
+        and cleaned["previous_default_count"]
+        > cleaned["previous_loan_count"]
     ):
-        return None, "previous_default_count cannot exceed previous_loan_count."
+        return None, (
+            "previous_default_count cannot exceed previous_loan_count."
+        )
+
+    if cleaned.get("contribution_status") not in (
+        None, "active", "inactive", "irregular"
+    ):
+        return None, (
+            "contribution_status must be active, inactive, or irregular."
+        )
+
+    if cleaned.get("contribution_frequency") not in (
+        None, "weekly", "monthly", "quarterly", "annually", "other"
+    ):
+        return None, (
+            "contribution_frequency must be weekly, monthly, quarterly, "
+            "annually, or other."
+        )
 
     return cleaned, None
 

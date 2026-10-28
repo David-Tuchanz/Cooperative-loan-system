@@ -1,5 +1,4 @@
 
-from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from flask import Blueprint, jsonify, request
@@ -36,11 +35,16 @@ def create_application():
         }), 400
 
     purpose = data.get("loan_purpose")
+    loan_type = data.get("loan_type")
     term = data.get("loan_term")
     frequency = data.get("repayment_frequency")
+    interest_rate_value = data.get("interest_rate")
 
     if not isinstance(purpose, str) or not purpose.strip():
         return jsonify({"message": "loan_purpose is required."}), 400
+
+    if not isinstance(loan_type, str) or not loan_type.strip():
+        return jsonify({"message": "loan_type is required."}), 400
 
     if not isinstance(term, int) or isinstance(term, bool) or term <= 0:
         return jsonify({"message": "loan_term must be a positive integer."}), 400
@@ -48,8 +52,25 @@ def create_application():
     allowed_frequencies = {"weekly", "monthly", "quarterly"}
     if frequency not in allowed_frequencies:
         return jsonify({
-            "message": "repayment_frequency must be weekly, monthly, or quarterly."
+            "message": (
+                "repayment_frequency must be weekly, monthly, or quarterly."
+            )
         }), 400
+
+    interest_rate = None
+    if interest_rate_value not in (None, ""):
+        try:
+            interest_rate = Decimal(str(interest_rate_value))
+            if (
+                not interest_rate.is_finite()
+                or interest_rate < 0
+                or interest_rate > 999.9999
+            ):
+                raise InvalidOperation
+        except (InvalidOperation, ValueError):
+            return jsonify({
+                "message": "interest_rate must be a valid non-negative number."
+            }), 400
 
     user_id = int(get_jwt_identity())
     role = get_jwt().get("role")
@@ -70,7 +91,10 @@ def create_application():
 
         if not isinstance(member_id, int) or isinstance(member_id, bool):
             return jsonify({
-                "message": "A valid member_id is required for officer-assisted applications."
+                "message": (
+                    "A valid member_id is required for "
+                    "officer-assisted applications."
+                )
             }), 400
 
         member = db.session.get(Member, member_id)
@@ -84,8 +108,10 @@ def create_application():
         member_id=member_id,
         submitted_by=user_id,
         amount_requested=amount,
+        loan_type=loan_type.strip(),
         loan_purpose=purpose.strip(),
         loan_term=term,
+        interest_rate=interest_rate,
         repayment_frequency=frequency,
         submission_method=submission_method,
         application_status="pending"

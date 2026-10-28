@@ -26,6 +26,11 @@ class Member(db.Model):
         default="active"
     )
 
+    # Fields added for machine learning input
+    member_category = db.Column(db.String(50))
+    cooperative_unit = db.Column(db.String(100))
+    cooperative_id = db.Column(db.Integer)
+
     user = db.relationship(
         "User",
         backref=db.backref("member", uselist=False)
@@ -49,5 +54,8 @@ class Member(db.Model):
                 self.membership_date.isoformat()
                 if self.membership_date else None
             ),
-            "membership_status": self.membership_status
+            "membership_status": self.membership_status,
+            "member_category": self.member_category,
+            "cooperative_unit": self.cooperative_unit,
+            "cooperative_id": self.cooperative_id
         }

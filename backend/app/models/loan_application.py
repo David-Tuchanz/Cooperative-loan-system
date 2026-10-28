@@ -19,8 +19,10 @@ class LoanApplication(db.Model):
         nullable=False
     )
     amount_requested = db.Column(db.Numeric(15, 2), nullable=False)
+    loan_type = db.Column(db.String(100))
     loan_purpose = db.Column(db.String(100))
     loan_term = db.Column(db.Integer)
+    interest_rate = db.Column(db.Numeric(7, 4))
     repayment_frequency = db.Column(db.String(30))
     application_date = db.Column(
         db.DateTime,
@@ -62,8 +64,13 @@ class LoanApplication(db.Model):
                 float(self.amount_requested)
                 if self.amount_requested is not None else None
             ),
+            "loan_type": self.loan_type,
             "loan_purpose": self.loan_purpose,
             "loan_term": self.loan_term,
+            "interest_rate": (
+                float(self.interest_rate)
+                if self.interest_rate is not None else None
+            ),
             "repayment_frequency": self.repayment_frequency,
             "application_date": (
                 self.application_date.isoformat()

@@ -26,6 +26,12 @@ class LoanApplicationAssessment(db.Model):
     savings_balance = db.Column(db.Numeric(15, 2))
     share_value = db.Column(db.Numeric(15, 2))
 
+    # Contribution information
+    monthly_contribution = db.Column(db.Numeric(15, 2))
+    contribution_frequency = db.Column(db.String(50))
+    contribution_status = db.Column(db.String(50))
+    total_contributions = db.Column(db.Numeric(15, 2))
+
     previous_loan_count = db.Column(db.Integer)
     previous_default_count = db.Column(db.Integer)
     previous_repayment_rate = db.Column(db.Numeric(7, 6))
@@ -86,6 +92,10 @@ class LoanApplicationAssessment(db.Model):
             "existing_monthly_obligation",
             "savings_balance",
             "share_value",
+            "monthly_contribution",
+            "contribution_frequency",
+            "contribution_status",
+            "total_contributions",
             "previous_loan_count",
             "previous_default_count",
             "previous_repayment_rate",
@@ -103,10 +113,7 @@ class LoanApplicationAssessment(db.Model):
         for field in fields:
             value = getattr(self, field)
 
-            if value is not None and isinstance(value, db.Numeric):
-                value = float(value)
-
-            elif value is not None and hasattr(value, "as_tuple"):
+            if value is not None and hasattr(value, "as_tuple"):
                 value = float(value)
 
             result[field] = value

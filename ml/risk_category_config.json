@@ -1,0 +1,16 @@
+{
+    "low": {
+        "minimum": 0.0,
+        "maximum_exclusive": 0.3
+    },
+    "medium": {
+        "minimum": 0.3,
+        "maximum_exclusive": 0.6
+    },
+    "high": {
+        "minimum": 0.6,
+        "maximum": 1.0
+    },
+    "binary_prediction_threshold": 0.45,
+    "status": "provisional"
+}

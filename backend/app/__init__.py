@@ -20,6 +20,8 @@ def create_app():
     from app.routes.assessments import assessments_bp
     from app.routes.loan_decisions import loan_decisions_bp
     from app.routes.repayments import repayments_bp
+    from app.routes.predictions import predictions_bp
+    from app.routes.dashboard import dashboard_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(members_bp)
@@ -27,6 +29,8 @@ def create_app():
     app.register_blueprint(assessments_bp)
     app.register_blueprint(loan_decisions_bp)
     app.register_blueprint(repayments_bp)
+    app.register_blueprint(predictions_bp)
+    app.register_blueprint(dashboard_bp)
 
     @app.get("/")
     def home():
