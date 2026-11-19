@@ -1,16 +1,23 @@
 {
     "low": {
         "minimum": 0.0,
-        "maximum_exclusive": 0.3
+        "maximum_exclusive": 0.20
     },
     "medium": {
-        "minimum": 0.3,
-        "maximum_exclusive": 0.6
+        "minimum": 0.20,
+        "maximum_exclusive": 0.45
     },
     "high": {
-        "minimum": 0.6,
+        "minimum": 0.45,
         "maximum": 1.0
     },
     "binary_prediction_threshold": 0.45,
+    "calibration": {
+        "method": "platt",
+        "slope": 0.8994,
+        "intercept": -1.0752,
+        "observed_default_rate": 0.2171,
+        "fitted_on": "Nigerian_Cooperative_Loan_Dataset_RAW.xlsx, 5752 loans"
+    },
     "status": "provisional"
 }

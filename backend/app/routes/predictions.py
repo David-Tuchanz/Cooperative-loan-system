@@ -167,6 +167,7 @@ def predict_application(application_id):
         return jsonify({
             "message": "Risk prediction generated successfully.",
             "prediction": prediction.to_dict(),
+            "unmapped_values": result["unmapped_values"],
         }), 201
 
     except (FileNotFoundError, ValueError) as error:

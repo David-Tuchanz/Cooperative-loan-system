@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from extensions import db
-from app.models import LoanApplication, Loan
+from app.models import LoanApplication, Loan, Notification
 from app.routes.permissions import role_required
 
 
@@ -19,7 +19,7 @@ loan_decisions_bp = Blueprint(
 
 @loan_decisions_bp.post("/<int:application_id>")
 @jwt_required()
-@role_required("admin", "loan_officer")
+@role_required("loan_officer")
 def decide_application(application_id):
     data = request.get_json(silent=True)
 
@@ -98,8 +98,36 @@ def decide_application(application_id):
         if loan is not None:
             db.session.add(loan)
 
-        db.session.commit()
+        # Notify the Member about the loan decision.
+        member = application.member
 
+        if member and member.user_id:
+            if decision == "approved":
+                title = "Loan Application Approved"
+                message = (
+                    f"Your loan application "
+                    f"(#{application.application_id}) "
+                    f"has been approved."
+                )
+            else:
+                title = "Loan Application Rejected"
+                message = (
+                    f"Your loan application "
+                    f"(#{application.application_id}) "
+                    f"has been rejected."
+                )
+
+            notification = Notification(
+                user_id=member.user_id,
+                title=title,
+                message=message,
+                notification_type=f"loan_application_{decision}",
+                related_id=application.application_id
+            )
+
+            db.session.add(notification)
+
+        db.session.commit()
     except Exception:
         db.session.rollback()
         raise

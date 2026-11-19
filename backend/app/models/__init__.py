@@ -6,6 +6,7 @@ from app.models.loan import Loan
 from app.models.repayment import Repayment
 from app.models.risk_prediction import RiskPrediction
 from app.models.loan_application_assessment import LoanApplicationAssessment
+from app.models.notification import Notification
 
 __all__ = [
     "User",
@@ -15,4 +16,5 @@ __all__ = [
     "Repayment",
     "RiskPrediction",
     "LoanApplicationAssessment",
+    "Notification",
 ]
